@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>chrispcowbot</title>
+<script src="https://cdn.jsdelivr.net/npm/tweakpane@3.0.7/dist/tweakpane.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+</head>
+<script>
+
+var vips = [];
+var mods = [];
+var addedso = [];
+var addee = "";
+var rmaddee = "";
+var remove = ""
+let checkuser = ""
+let win;
+let stopMod = false;
+let stopVip = false;
+let stopList = false;
+let added =  "";
+
+
+</script>
+<body>
+    <header id="titlebar">
+        <div>
+            <div id="title">
+                <span style="vertical-align: middle;"></span>
+                ChrisPCowBoT
+                <button id="help" class="button" onClick="window.open('help.html');">
+                    <span class="icon">Help</span>
+               </button>               
+        </div>
+    </div>
+    
+    </header>
+    <div>
+        <div class="row" id="app" style="width:100%; margin-bottom: 20px; margin-top: 45px;">
+            <div class="col-sm-12 col-xs-12">
+                <script>
+                    type="text/javascript"
+                    const pane = new Tweakpane.Pane({
+                    container: document.getElementById('app'),
+                    });
+                    
+                    const channelName = {
+                    Channel: 'Enter Twitch Channel',
+                    };
+                    
+                    pane.addInput(channelName, 'Channel');
+
+
+
+                    
+                    const startBot = pane.addButton({
+                      title: 'Start Bot',
+                    });
+                    
+                    startBot.on('click', () => {
+                        ComfyJS.Init( "chrispcowbot", 'oauth:oaawj7x8kq6oa2ixd30t7ox5c4ho3n', channelName.Channel);
+                        //console.log(`On the shoutout list is :\n${added}`)
+                        console.log(`Joining channel:\n${channelName.Channel}\n`)
+                    });
+
+
+
+
+                    const stopBot = pane.addButton({
+                      title: 'Stop Bot',
+                    });
+                    
+                    stopBot.on('click', () => {
+                        ComfyJS.Disconnect();
+                        console.log(`Successfully disconnected`);
+                    });
+
+
+                    const advanced = pane.addButton({
+                    title: 'Advanced',
+                    });
+
+                    advanced.on('click', () => {
+                    test.hidden = !test.hidden;
+                    soFolder.hidden = !soFolder.hidden
+                    });
+
+                    pane.addSeparator();
+
+                    const test = pane.addButton({
+                      title: 'Display List',
+                      hidden: true,
+                    });
+                    
+                    test.on('click', () => {
+                        console.log(localStorage.solist)
+                        clearList.hidden = !clearList.hidden
+
+                    });
+                    
+                    const clearList = pane.addButton({
+                      title: '*WARNING* CLEAR THE LIST *WARNING*',
+                      hidden: true
+                    });
+                    
+                    clearList.on('click', () => {
+                        localStorage.clear();
+                        localStorage.solist = "";
+                        console.log(`Cleared the list :(`);
+                    });
+
+
+
+
+
+                    pane.addSeparator();
+                    //
+
+                    const soFolder = pane.addFolder({
+                    hidden: true,
+                    title: 'Toggle Shout Outs',
+                    expanded: false,   // optional
+                    });
+
+
+                    const modToggle = {
+                    Mods: true,
+                    };
+                    
+                    soFolder.addInput(modToggle, 'Mods').on('change', (ev) => {
+                    //console.log(modToggle.Mods)
+                    if (modToggle.Mods === true){
+                        toggleModsOn() }
+                    else if (modToggle.Mods === false) {
+                        toggleModsOff() }
+                    
+
+                    });
+                    //
+
+                    const vipToggle = {
+                    Vips: true,
+                    };
+
+                    soFolder.addInput(vipToggle, 'Vips').on('change', (ev) => {
+                    if (vipToggle.Vips === true){
+                        toggleVipsOn() }
+                    else if (vipToggle.Vips === false) {
+                        toggleVipsOff() }
+                        //
+                    
+                    });
+
+
+                    //
+                    const listToggle = {
+                    List: true,
+                    };
+
+                    soFolder.addInput(listToggle, 'List').on('change', (ev) => {
+                        if (listToggle.List === true){
+                        toggleListOn() }
+                    else if (listToggle.List === false) {
+                        toggleListOff() }
+                    });
+
+
+                    </script>
+        </div>
+        <div id="log-container">
+            <pre id="log"></pre>
+        </div>
+    </div>
+</div>
+
+
+<script>
+        //// start bot
+
+                        // TOGGLES
+                        function toggleModsOn(){
+                            stopMod = false;
+                            console.log("Mods on")
+                        }
+                        function toggleModsOff(){
+                            stopMod = true;
+                            console.log("Mods off")
+
+                        }
+                        function toggleVipsOn(){
+                            stopVip = false;
+                            console.log("Vips on")
+                        }
+                        function toggleVipsOff(){
+                            stopVip = true;
+                            console.log("Vips off")
+                        }
+                        function toggleListOn(){
+                            stopList = false;
+                            console.log("List on")
+
+                        }
+                        function toggleListOff(){
+                            stopList = true;
+                            console.log("List off")
+                        }
+
+                        // on connect
+                        ComfyJS.onConnected = ( address, port, isFirstConnect )  => {
+                        if (isFirstConnect === true)
+                        ComfyJS.Say("Hello I have joined the chat!");
+                        }
+
+                    // Logs errors to console
+                    ComfyJS.onError = ( error )  => {
+                    console.log(error);
+                    }
+
+                    /// 
+ComfyJS.onCommand = ( user, command, message, flags, extra ) => {
+  if( command === "help" && (flags.broadcaster || flags.mod) ) {
+    ComfyJS.Say( "Hello, I am chrispcowbot a bot made by ChrisPCowboy. I currently automatically shout out Mods, VIPS, and users from a list once they chat for the first time! To add a user type !add 'user' and to remove them type !remove 'user'." );
+  } // !help triggers this message
+
+  // add a user to the list
+  if (command === "add"  && (flags.broadcaster || flags.mod) ) {
+    addee = message.toLowerCase();
+      if (localStorage.solist.includes(` ${addee} `) === true) {
+        ComfyJS.Say(`Sorry, ${message} has already been added to the list.`);
+        console.log(localStorage.solist);
+      }
+      else if (message.includes('@')){
+        addee = addee.slice(1);
+
+        if (localStorage.solist.includes(`${addee} `) === true) {
+          ComfyJS.Say(`Sorry, ${message} has already been added to the list.`);
+          console.log(localStorage.solist);
+        }
+        else {localStorage.solist = `${localStorage.solist}\n ${addee} \n`; 
+        ComfyJS.Say(`${user}, I have now added ${addee}.`);
+        console.log(localStorage.solist);
+        }
+      }
+      else {
+        localStorage.solist = `${localStorage.solist}\n ${addee} \n`; 
+        ComfyJS.Say(`${user}, I have now added ${addee}.`);
+        console.log(localStorage.solist);
+        console.log(localStorage.solist.includes(` ${addee} `))
+        }
+        }
+
+  // removes a user from the list
+  if (command === "remove" && (flags.broadcaster || flags.mod) ) {
+    localStorage.solist;
+      rmaddee = message.toLowerCase();
+    if (message.includes('@')){
+        rmaddee = rmaddee.slice(1)
+
+        if (localStorage.solist.includes(` ${rmaddee} `)) {
+          added = localStorage.solist;
+          remove = added.replace(new RegExp(` ${rmaddee} \n`, "gim"), "");
+          localStorage.solist = remove;
+          ComfyJS.Say(`${user}, I have now removed ${rmaddee}.`);
+          }
+        else {
+          ComfyJS.Say(`${rmaddee} is not on the list.`)
+        }
+    }
+    else {    
+      if (localStorage.solist.includes(` ${rmaddee} `)) {
+            added = localStorage.solist;
+            remove = added.replace(new RegExp(` ${rmaddee} \n`, "gim"), "");
+            localStorage.solist = remove;
+            ComfyJS.Say(`${user}, I have now removed ${rmaddee}.`);
+            }
+      else {
+        ComfyJS.Say(`${rmaddee} is not on the list.`);
+      }
+       
+    }
+  }  
+}
+// SO if mod or VIP    
+ComfyJS.onChat = ( user, message, flags, self, extra ) => {
+  if (!stopMod && !self) {
+        checkuser = user.toLowerCase();
+
+      if( flags.mod && !addedso.includes(checkuser) && !self) {
+        ComfyJS.Say(`Welcome on in MOD! Go follow the legend themselves at twitch.tv/${user}.`);
+        addedso.push(checkuser);
+        console.log(`SO session list includes ${addedso}`);
+      }
+    }
+  if (!stopVip && !self) {
+      if( flags.vip && !addedso.includes(checkuser) && !self) {
+        ComfyJS.Say(`Welcome on in VIP! Go follow the legend themselves at twitch.tv/${user}.`);
+        addedso.push(checkuser);
+        console.log(`SO session list includes ${addedso}`);
+      }
+    }
+  if (!stopList && !self) {
+      //SO if on the list, adds them to session list
+      if (!self && !flags.broadcaster && !flags.mod && !flags.vip) {
+        localStorage.solist;
+        checkuser = user.toLowerCase();
+        if( localStorage.solist.includes(` ${checkuser} `) && !addedso.includes(checkuser) ){
+        ComfyJS.Say(`Welcome on in ${user}, Go follow the legend themselves at twitch.tv/${user}.`);
+        addedso.push(checkuser);
+        console.log(`SO session list includes ${addedso}`);
+        }
+      }
+    }
+}
+
+//not tested
+ComfyJS.onRaid = ( user, viewers, extra) => {
+  checkuser = user.toLowerCase();
+  if (!added.hasOwnProperty(` ${checkuser}`) && !addedso.includes(` ${checkuser}`)) {
+      ComfyJS.Say(`Welcome on in ${user} and thank you for the raid of ${viewers}. You're the best!`);
+  }
+}
+              
+    /////// LOGS
+    rewireLoggingToElement(
+    () => document.getElementById("log"),
+    () => document.getElementById("log-container"), true);
+
+                    function rewireLoggingToElement(eleLocator, eleOverflowLocator, autoScroll) {
+    fixLoggingFunc('log');
+    fixLoggingFunc('debug');
+    fixLoggingFunc('warn');
+    fixLoggingFunc('error');
+    fixLoggingFunc('info');
+
+    function fixLoggingFunc(name) {
+        console['old' + name] = console[name];
+        console[name] = function(...arguments) {
+            const output = produceOutput(name, arguments);
+            const eleLog = eleLocator();
+
+            if (autoScroll) {
+                const eleContainerLog = eleOverflowLocator();
+                const isScrolledToBottom = eleContainerLog.scrollHeight - eleContainerLog.clientHeight <= eleContainerLog.scrollTop + 1;
+                eleLog.innerHTML += output + "<br>";
+                if (isScrolledToBottom) {
+                    eleContainerLog.scrollTop = eleContainerLog.scrollHeight - eleContainerLog.clientHeight;
+                }
+            } else {
+                eleLog.innerHTML += output + "<br>";
+            }
+
+            console['old' + name].apply(undefined, arguments);
+        };
+    }
+
+    function produceOutput(name, args) {
+        return args.reduce((output, arg) => {
+            return output +
+                "<span class=\"log-" + (typeof arg) + " log-" + name + "\">" +
+                    (typeof arg === "object" && (JSON || {}).stringify ? JSON.stringify(arg) : arg) +
+                "</span>&nbsp;";
+        }, '');
+    }
+}
+</script>
+<style>
+    #log-container { 
+    overflow: auto; height: 400px; font-weight: bold; 
+}
+body {
+    background-color: rgb(40, 40, 40);
+    } 
+.row {
+    text-align: center;
+}   
+#titlebar {
+    position: fixed;
+    user-select: none;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    vertical-align: middle;
+    background-color: rgb(40, 40, 40);
+    padding: none;
+    margin: 0px;
+}
+
+#text{
+    color: rgba(251,238,185,255);
+}
+
+#help {
+    background-color: rgb(40, 40, 40);
+    color: rgba(251,238,185,255);
+}
+
+.draggable {
+    padding: 8px;
+    font-family: sans-serif;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    -webkit-app-region: drag;
+}
+#title {
+    position: fixed;
+    top: 0px;
+    left: 6px;
+    color: rgba(251,238,185,255);
+}
+#log {
+    color: rgba(251,238,185,255);
+}
+* {
+    box-shadow: none;
+}
+
+.container {
+    max-width: 1000px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.switch-holder {
+    height: 20px;
+    width: 50%;
+    display: flex;
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    color: rgba(251,238,185,255);
+    box-shadow: -2px -2px 11px rgba(251,238,185,255),
+                10px 10px 10px rgba(0,0,0, .3),
+                inset 8px 8px 11px rgba(251,238,185,255),
+                inset 10px 10px 10px rgba(0,0,0, .3);
+    justify-content: space-between;
+    align-items: center;
+}
+
+.switch-label {
+    width: 150px;
+}
+
+.switch-label i {
+    margin-right: 5px;
+}
+
+.switch-toggle {
+    height: 40px;
+}
+
+.switch-toggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    z-index: -2;
+}
+
+.switch-toggle input[type="checkbox"] + label {
+    position: relative;
+    display: inline-block;
+    width: 100px;
+    height: 40px;
+    border-radius: 20px;
+    margin: 0;
+    cursor: pointer;
+    box-shadow: inset -2px -2px 11px rgba(251,238,185,255),
+                inset 10px 10px 10px rgba(0,0,0, .25);
+    
+}
+
+.switch-toggle input[type="checkbox"] + label::before {
+    position: absolute;
+    content: 'OFF';
+    font-size: 13px;
+    text-align: center;
+    line-height: 25px;
+    top: 8px;
+    left: 8px;
+    width: 45px;
+    height: 25px;
+    border-radius: 20px;
+    color: rgb(0,0,0);
+    background-color: #d1dad3;
+    box-shadow: -2px -2px 1px rgba(251,238,185,255),
+                3px 3px 5px rgba(0,0,0, .25);
+    transition: .3s ease-in-out;
+}
+
+.switch-toggle input[type="checkbox"]:checked + label::before {
+    left: 50%;
+    content: 'ON';
+    color: #fff;
+    background-color: #00b33c;
+    box-shadow: -2px -2px 1px rgba(251,238,185,255),
+                3px 3px 5px #00b33c;
+}
+:root {
+        --tp-base-background-color: hsla(0, 0%, 10%, 0.8);
+        --tp-base-shadow-color: hsla(0, 0%, 0%, 0.2);
+        --tp-button-background-color: hsla(0, 0%, 80%, 1);
+        --tp-button-background-color-active: hsla(0, 72%, 44%, 1.00);
+        --tp-button-background-color-focus: hsla(0, 72%, 44%, 1.00);
+        --tp-button-background-color-hover: hsla(109, 82%, 79%, 1.00);
+        --tp-button-foreground-color: hsla(0, 0%, 0%, 0.8);
+        --tp-container-background-color: hsla(0, 0%, 0%, 0.3);
+        --tp-container-background-color-active: hsla(0, 0%, 0%, 0.6);
+        --tp-container-background-color-focus: hsla(0, 0%, 0%, 0.5);
+        --tp-container-background-color-hover: hsla(0, 0%, 0%, 0.4);
+        --tp-container-foreground-color: hsla(0, 0%, 100%, 0.5);
+        --tp-groove-foreground-color: hsla(0, 0%, 0%, 0.2);
+        --tp-input-background-color: hsla(0, 0%, 0%, 0.3);
+        --tp-input-background-color-active: hsla(0, 0%, 0%, 0.6);
+        --tp-input-background-color-focus: hsla(0, 0%, 0%, 0.5);
+        --tp-input-background-color-hover: hsla(0, 0%, 0%, 0.4);
+        --tp-input-foreground-color: hsla(0, 0%, 100%, 0.5);
+        --tp-label-foreground-color: hsla(0, 0%, 100%, 0.5);
+        --tp-monitor-background-color: hsla(0, 0%, 0%, 0.3);
+        --tp-monitor-foreground-color: hsla(0, 0%, 100%, 0.3);
+  }
+
+
+
+
+</style>
+</body>
