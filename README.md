@@ -1,0 +1,1 @@
+Hello, I am chrispcowbot a bot made by ChrisPCowboy. I currently automatically shout out Mods, VIPS, and users from a list once they chat for the first time! To add a user type !add 'user' and to remove them type !remove 'user'
